@@ -1,0 +1,81 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs}
+
+\begin{document}
+\section*{Noxious-Facility Computational Results}
+
+The equations below are placeholders so this fragment compiles
+independently.  Copy only the block marked ``BEGIN PAPER INSERT''
+into paper/Lorentz.tex.
+\begin{equation}
+\label{eq:targeted}
+p_i\in\mathbb{R}^2,\qquad i=1,\ldots,4.
+\end{equation}
+
+% ======================== BEGIN PAPER INSERT ========================
+\begin{table}
+\caption{Distance upper bounds for regular \(m\)-gons}
+\vskip 10pt
+\label{tab:regular}
+\centering
+\begin{tabular}{r|rrrr}
+\toprule
+\(m\) & Shor & RLT & KRON & Full SEP \\
+\midrule
+3  & 1.414214 & 1.414214 & 1.174750 & 1.114373 \\
+4  & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+5  & 1.414214 & 1.414214 & 1.163184 & 1.025778 \\
+6  & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+7  & 1.414214 & 1.414214 & 1.149584 & 1.010315 \\
+8  & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+10 & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+12 & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+16 & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% Full SEP distance upper bound for larger regular m-gons (m=20: 1.001735, m=24: 1.001735, m=32: 1.001735)
+
+\begin{table}
+\caption{Results for normalized random instances}
+\label{tab:random}
+\vskip 10pt
+\centering
+\begin{tabular}{rr|c|c|c|c}
+\toprule
+ & &Shor gap &  RLT gap & KRON gap & SEP gap\\
+\(m\) & cases & median/max & median/max & median/max& median/max\\
+\midrule
+4  & 10 & 0.462/0.525 & 0.454/0.525 & 0.152/0.234 & 0.084/0.219 \\
+6  & 10 & 0.445/0.495 & 0.426/0.494 & 0.203/0.264 & 0.144/0.257 \\
+8  & 10 & 0.480/0.506 & 0.472/0.505 & 0.268/0.355 & 0.217/0.351 \\
+10 & 10 & 0.526/0.618 & 0.526/0.607 & 0.318/0.389 & 0.249/0.332 \\
+15 & 10 & 0.537/0.624 & 0.537/0.624 & 0.358/0.402 & 0.315/0.387 \\
+20 & 10 & 0.581/0.613 & 0.581/0.613 & 0.402/0.430 & 0.365/0.402 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% median Full SEP times for m=4,6,8,10,15,20: 0.046, 0.096, 0.174, 0.313, 0.819, 2.213 s; median KRON times for m=4,6,8,10,15,20: 0.074, 0.184, 0.506, 1.430, 7.235, 35.145 s
+
+\begin{table}\caption{Bounds for instance with points \eqref{eq:targeted}}
+\label{tab:targeted}
+\centering
+\vskip 10pt
+\begin{tabular}{r|r}
+\toprule
+method & distance upper bound \\
+\midrule
+Shor     & 1.2174074784 \\
+RLT      & 1.0382899391 \\
+KRON     & 0.8379375081 \\
+Full SEP & 0.7257975088 \\
+\midrule
+exact value & 0.7256779914 \\
+\bottomrule
+\end{tabular}
+
+\end{table}
+% ========================= END PAPER INSERT =========================
+
+\end{document}

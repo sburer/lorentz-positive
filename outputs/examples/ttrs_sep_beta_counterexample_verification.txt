@@ -1,0 +1,20 @@
+Shifted n=2 TTRS counterexample
+--------------------------------
+a:                         [1.333333333333 1.083333333333]
+b:                         [0.550000000000 -0.050000000000]
+min eig(Q):                -1.505635621484
+
+Shor bound:                -0.768293943469
+Full SEP bound:            -0.632844508289
+shifted beta dual bound:   -0.550899217259
+boundary optimum:          -0.546797627007
+boundary optimizer:        [0.185929524305 0.602567865183]
+boundary candidates:       10
+
+OPT - SEP gap:             0.086046881282
+OPT - beta gap:            0.004101590252
+SEP x-norm squared:        0.139541363013
+SEP y-norm squared:        0.004339906310
+SEP trace x moment:        0.808104046269
+SEP trace y moment:        1.000000000282
+SEP rank-one residual:     0.498013951456

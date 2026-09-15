@@ -1,0 +1,433 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage[hidelinks]{hyperref}
+
+\providecommand{\Rbb}{\mathbb{R}}
+\providecommand{\Ecal}{\mathcal{E}}
+\providecommand{\suchthat}{:\,}
+\providecommand{\norm}[1]{\left\lVert #1\right\rVert}
+
+\title{Current Computational Results for Lorentz/SEP Paper}
+\author{}
+\date{September 15, 2026}
+
+\begin{document}
+\maketitle
+
+\noindent This note collects the current generated computational fragments in
+the style of the latest manuscript draft.  The raw CSV files have been
+refreshed so that every Lazy SEP row uses coordinate skew-skew cuts and reports
+coordinate skew-skew residuals.  In the max-distance and TTRS tables, each SDP
+gap uses the feasible point recovered from that method's own first column as
+its upper bound; neither Gurobi nor a beta reference supplies an SDP upper
+bound.  Throughout the note, ``tight'' has the single definition that this
+method-specific relative gap is at most \(10^{-5}\).  The larger generated
+panels also calculate relative rank-one residuals and recovered-point
+feasibility violations, but those diagnostics do not enter the tight count.
+
+\paragraph{Displayed formulations.}
+The following equations are included so the generated fragments compile outside
+\texttt{paper/Lorentz.tex}.
+\begin{equation}
+\label{eq:bilinear}
+\min\{c^\top x+d^\top y+y^\top Rx:\ x\in\Ecal_x,\ y\in\Ecal_y\}.
+\end{equation}
+\begin{equation}
+\label{eq:quadratic}
+\min\{c^\top x+d^\top y+x^\top Qx+y^\top Py+y^\top Rx:\ x\in\Ecal_x,\ y\in\Ecal_y\}.
+\end{equation}
+\begin{equation}
+\label{eq:shor}
+\min\{\langle C,U\rangle:\ \operatorname{tr}X\le 1,\ \operatorname{tr}Y\le 1,\ U\succeq 0\}.
+\end{equation}
+\begin{equation}
+\label{eq:fullsep}
+\eqref{eq:shor}\ \text{with}\ Z=\mathcal{W}^*(T),\ \langle T,X\rangle=0\ \forall X\in\mathcal{A}(n)\otimes\mathcal{A}(m),\ T\succeq 0.
+\end{equation}
+
+\section{Pure Bilinear Instances}
+\noindent We generated 120 random instances of \eqref{eq:bilinear} with
+\(\Ecal_x=\{x\in\Rbb^m\suchthat \norm{x}\le 1\}\) and
+\(\Ecal_y=\{y\in\Rbb^n\suchthat \norm{y}\le 1\}\).  For each candidate instance, \(R\in\Rbb^{n\times m}\) was sampled with independent standard normal entries.  Let \(u_1\in\Rbb^n\) and \(v_1\in\Rbb^m\) be the leading left and right singular vectors of \(R\).  We then set \(c=\alpha v_1+\sigma g\) and \(d=\alpha u_1+\sigma h\), where \(g\) and \(h\) have independent standard normal entries, \(\alpha=3.0\), and \(\sigma=0.1\).  Finally, the triple \((c,d,R)\) was divided by \(\max\{\norm{c},\norm{d}\}\), so that \(\max\{\norm{c},\norm{d}\}=1\).
+For each size we scanned seeds starting from zero and selected the first ten candidates for which the Shor relative gap \((z_{\rm exact}-z_{\rm Shor})/|z_{\rm Shor}|\) exceeded \(0.01\).  We compared the Shor SDP relaxation, Full SEP, Lazy SEP,
+the Dual LOP/TRS bisection method, and Gurobi.
+Gurobi was run after the three conic methods with explicit bounds
+\(-1\le x_j\le 1\), \(-1\le y_i\le 1\) for each \(i\) and \(j\), the two
+ball constraints, and time limit \(\max\{5,3\,t_{\max}\}\), where
+\(t_{\max}\) is the maximum time used by the three conic methods on that
+instance.  Lazy SEP added at most 50 violated coordinate skew-skew equalities
+in each outer-approximation round, using violation tolerance \(10^{-7}\).
+The Dual LOP/TRS method used bisection tolerance \(10^{-6}\).
+
+\begin{table}[htbp]
+\centering
+\caption{Median wall-clock times for bilinear instances.}
+\label{tab:bilinear_times}
+\small
+\begin{tabular}{c r r r r r r r}
+\hline
+$n\times m$ & cases & Shor & Full SEP & Lazy SEP & LOP/TRS & Gurobi & Gurobi opt \\
+\hline
+$2\times 2$ & 10 & 1 ms & 1 ms & 1 ms & 18 ms & 25 ms & 10 \\
+$4\times 4$ & 10 & 1 ms & 2 ms & 5 ms & 23 ms & 1.81 s & 9 \\
+$6\times 6$ & 10 & 1 ms & 11 ms & 21 ms & 24 ms & 5.00 s & 0 \\
+$8\times 8$ & 10 & 2 ms & 49 ms & 82 ms & 28 ms & 5.00 s & 0 \\
+$10\times 10$ & 10 & 2 ms & 321 ms & 318 ms & 31 ms & 5.01 s & 0 \\
+$15\times 15$ & 10 & 3 ms & 12.00 s & 3.10 s & 40 ms & 36.00 s & 0 \\
+$20\times 20$ & 10 & 5 ms & 481.33 s & 51.20 s & 60 ms & 1444.06 s & 0 \\
+\hline
+$4\times 8$ & 10 & 1 ms & 7 ms & 16 ms & 27 ms & 5.00 s & 0 \\
+$8\times 12$ & 10 & 2 ms & 248 ms & 267 ms & 33 ms & 5.01 s & 0 \\
+$10\times 20$ & 10 & 3 ms & 7.14 s & 2.24 s & 51 ms & 21.42 s & 0 \\
+$15\times 20$ & 10 & 4 ms & 59.18 s & 15.22 s & 54 ms & 177.55 s & 0 \\
+$15\times 25$ & 10 & 5 ms & 249.54 s & 24.95 s & 65 ms & 748.66 s & 0 \\
+\hline
+\hline
+\end{tabular}
+\end{table}
+
+The median times required by different methods on these test instances are
+given in Table~\ref{tab:bilinear_times}.  In the table, the column
+\(n\times m\) gives the dimensions of \(y\) and \(x\), respectively.  Ten
+cases were run for each size.  The Shor, Full SEP, Lazy SEP, LOP/TRS, and
+Gurobi columns give median wall-clock times for the five methods.  The
+Gurobi opt column gives the number of instances solved to global optimality
+by Gurobi within its adaptive time limit.
+
+In Table~\ref{tab:bilinear_diagnostics} we give additional numerical
+diagnostics for the same instances as in Table~\ref{tab:bilinear_times}.  By
+construction none of the Shor instances has a lower bound that agrees with
+the exact conic value within \(10^{-5}\).  The ``Shor max
+gap'' column gives the largest gap between the exact conic value and
+the Shor lower bound.  The ``Conic max diff'' column is the largest
+objective difference
+among all the exact conic methods over all instances of that size.  The Lazy
+SEP columns give the median/maximum outer-approximation rounds, total added
+coordinate skew-skew cuts and the largest final coordinate skew-skew equation
+violation.  The
+LOP/TRS columns report the median/maximum TRS separation oracle solves for
+the Dual LOP/TRS method as well as the maximum final bisection
+bracket width.
+
+\begin{table}[htbp]
+\centering
+\caption{Additional diagnostics for bilinear instances.}
+\label{tab:bilinear_diagnostics}
+\begingroup
+\setlength{\tabcolsep}{2.5pt}
+\scriptsize
+\begin{tabular}{c|r|r|r r r|r r}
+\hline
+& Shor & Conic & \multicolumn{3}{c|}{Lazy SEP} & \multicolumn{2}{c}{LOP/TRS} \\
+$n\times m$ & max gap & max diff & rounds & cuts & max skew & oracles & max gap \\
+\hline
+$2\times 2$ & $2.9\cdot 10^{-1}$ & $5.5\cdot 10^{-8}$ & 2/2 & 1/1 & $2.3\cdot 10^{-14}$ & 23/23 & $8.9\cdot 10^{-7}$ \\
+$4\times 4$ & $2.4\cdot 10^{-1}$ & $3.2\cdot 10^{-8}$ & 2/2 & 36/36 & $5.8\cdot 10^{-12}$ & 23/23 & $8.3\cdot 10^{-7}$ \\
+$6\times 6$ & $1.9\cdot 10^{-1}$ & $1.2\cdot 10^{-7}$ & 3/4 & 100/150 & $1.3\cdot 10^{-8}$ & 23/23 & $8.1\cdot 10^{-7}$ \\
+$8\times 8$ & $1.4\cdot 10^{-1}$ & $3.2\cdot 10^{-8}$ & 5/6 & 200/250 & $2.2\cdot 10^{-9}$ & 23/23 & $7.5\cdot 10^{-7}$ \\
+$10\times 10$ & $1.2\cdot 10^{-1}$ & $4.1\cdot 10^{-8}$ & 9/12 & 400/550 & $2.1\cdot 10^{-9}$ & 23/23 & $7.3\cdot 10^{-7}$ \\
+$15\times 15$ & $6.8\cdot 10^{-2}$ & $1.2\cdot 10^{-8}$ & 22/37 & 1025/1800 & $3.0\cdot 10^{-9}$ & 23/23 & $6.7\cdot 10^{-7}$ \\
+$20\times 20$ & $6.7\cdot 10^{-2}$ & $5.5\cdot 10^{-9}$ & 63/76 & 3100/3750 & $9.9\cdot 10^{-9}$ & 23/23 & $6.6\cdot 10^{-7}$ \\
+\hline
+$4\times 8$ & $1.8\cdot 10^{-1}$ & $3.2\cdot 10^{-7}$ & 3/4 & 100/150 & $1.8\cdot 10^{-9}$ & 23/23 & $7.9\cdot 10^{-7}$ \\
+$8\times 12$ & $1.1\cdot 10^{-1}$ & $1.2\cdot 10^{-7}$ & 9/11 & 400/500 & $2.2\cdot 10^{-9}$ & 23/23 & $7.1\cdot 10^{-7}$ \\
+$10\times 20$ & $8.7\cdot 10^{-2}$ & $8.5\cdot 10^{-9}$ & 20/30 & 950/1450 & $2.2\cdot 10^{-9}$ & 23/23 & $6.8\cdot 10^{-7}$ \\
+$15\times 20$ & $6.0\cdot 10^{-2}$ & $2.3\cdot 10^{-8}$ & 41/54 & 2000/2650 & $1.9\cdot 10^{-9}$ & 23/23 & $6.5\cdot 10^{-7}$ \\
+$15\times 25$ & $5.5\cdot 10^{-2}$ & $3.1\cdot 10^{-7}$ & 46/82 & 2250/4050 & $2.3\cdot 10^{-9}$ & 23/23 & $6.5\cdot 10^{-7}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+To summarize these results, Lazy SEP is slower than Full SEP on smaller
+instances due to the overhead of checking for violated skew-skew constraints
+and repeated conic solves, but the time for Full SEP blows up faster as
+problem size increases.  The Dual LOP/TRS bisection algorithm is very fast
+and robust and scales much better than Full SEP or Lazy SEP.  These problems
+are difficult for Gurobi, even with the explicit variable bounds added, and
+cannot be solved in time competitive to the conic methods.
+
+\section{Max-Distance Instances}
+\noindent We generated 60 random max-distance instances, that is,
+instances of \eqref{eq:quadratic} of the form
+\[
+\max\{\norm{(Ax+a)-(By+b)}^2\suchthat \norm{x}\le 1,\ \norm{y}\le 1\},
+\]
+with \(n=m\), so that \(\Ecal_x=\{Ax+a\suchthat\norm{x}\le 1\}\) and
+\(\Ecal_y=\{By+b\suchthat\norm{y}\le 1\}\) are the two ellipsoids whose
+farthest pair of points is sought.  The maps \(A\) and \(B\) were generated as
+\(U\Sigma V^\top\) with Haar-random orthogonal \(U,V\) and singular values log-uniform on \([1,5.0]\), and the centers \(a\) and \(b\) have independent normal
+entries.  Because the Shor relaxation \eqref{eq:shor} is already exact on most max-distance instances, the instances reported here were selected by a rank-only screen, applied to seeds starting from zero.  The screen first solves \eqref{eq:shor} and discards the instance when the two largest eigenvalues of the optimal \(U\) satisfy \(\lambda_1/\lambda_2>10^4\), treating a numerically negative \(\lambda_2\) by using \(|\lambda_2|\) in the denominator.  Such a solution is effectively rank one, in which case \(U\) is itself a feasible point attaining the bound and the relaxation is exact.  For the remainder, the screen re-solves the Shor relaxation with the Shor objective held fixed up to solver tolerance and with a random linear objective; this exposes rank-one optima when the original solve returned a higher-rank point on a flat optimal face.  If this second solve is still not effectively rank one, the instance is retained; no feasible reference value is computed during this preselection step.  Such instances are rare: retaining 10 per size required scanning up to 16970 seeds.  The reported results are therefore conditional on the Shor relaxation not being certified rank one by this screen, and are not representative of the class as a whole.
+We compared the Shor SDP relaxation \eqref{eq:shor}, Shor strengthened by the
+KRON constraint \(K(Z)\succeq 0\), Lazy KRON, Full SEP \eqref{eq:fullsep}, and
+Lazy SEP.
+Unlike the bilinear problem of Section 3, none of these relaxations is
+guaranteed exact for the class \eqref{eq:quadratic}.  For each SDP method, we extracted
+\((x,y)\) from the first column of its optimal moment matrix, verified the two
+ball constraints to tolerance \(10^{-7}\), and evaluated the original
+minimization objective at that point.  This gives a method-specific feasible
+upper bound; no Gurobi incumbent or point recovered by another method is used
+to calculate an SDP gap.  The retained Gurobi runs used explicit bounds \(-1\le x_j\le 1\), \(-1\le y_i\le 1\), the two ball constraints, and time limit \(\max\{5,3\,t_{\max}\}\), where \(t_{\max}\) is the maximum conic-method time available when that Gurobi run was started.  These Gurobi rows were not rerun after the conic refresh and are reported only as an independent comparison.  Lazy KRON added at most 50 violated KRON cuts in each
+outer-approximation round.  Lazy SEP added at most 50 violated coordinate
+skew-skew equalities in each round.  Both used relative violation tolerance
+\(10^{-7}\).
+
+\begin{table}[htbp]
+\centering
+\caption{Median wall-clock times for max-distance instances.}
+\label{tab:maxdist_times}
+\small
+\begin{tabular}{c r r r r r r r r}
+\hline
+$n$ & cases & Shor & KRON & Lazy KRON & Full SEP & Lazy SEP & Gurobi & Gurobi opt \\
+\hline
+2 & 10 & 1 ms & 3 ms & 4 ms & 3 ms & 3 ms & 55 ms & 10 \\
+4 & 10 & 1 ms & 10 ms & 8 ms & 7 ms & 7 ms & 4.93 s & 5 \\
+6 & 10 & 2 ms & 69 ms & 10 ms & 21 ms & 14 ms & 5.00 s & 0 \\
+8 & 10 & 2 ms & 605 ms & 22 ms & 84 ms & 32 ms & 5.00 s & 0 \\
+10 & 10 & 2 ms & 4.60 s & 38 ms & 398 ms & 58 ms & 13.81 s & 0 \\
+15 & 10 & 4 ms & 611.65 s & 151 ms & 16.33 s & 251 ms & 1543.72 s & 0 \\
+\hline
+\hline
+\end{tabular}
+\end{table}
+
+The median times required by the different methods are given in
+Table~\ref{tab:maxdist_times}.  In the table, the column \(n\) gives the
+dimensions of \(y\) and \(x\).  The Gurobi opt column gives the
+number of instances solved to global optimality by Gurobi within its adaptive
+time limit.  The Full KRON solve for \(n=15\), seed 278, used two MOSEK
+threads after repeated memory-related termination with the default parallel
+setting; its formulation and tolerances were unchanged.
+
+Table~\ref{tab:maxdist_diagnostics} reports bound quality on the same instances.
+For Shor, Full KRON, and Full SEP (labeled SEP), the tight column counts instances whose
+method-specific relative recovered-point gap is at most \(10^{-5}\), while max
+gap gives the largest such gap over the instances of that size.  If
+\(z_{\rm sdp}\) is the SDP lower bound and \(z_{\rm rec}\) is that method's
+recovered feasible upper bound, this gap is
+\((z_{\rm rec}-z_{\rm sdp})/
+\max\{1,|z_{\rm rec}|,|z_{\rm sdp}|\}\).  Lazy KRON matched the Full KRON tight count at all other sizes, but at \(n=2\), 9/10 versus 10/10 (Lazy KRON max gap $1.7\cdot 10^{-5}$); at \(n=4\), 10/10 versus 9/10 (Lazy KRON max gap $8.2\cdot 10^{-6}$); at \(n=8\), 8/10 versus 9/10 (Lazy KRON max gap $2.3\cdot 10^{-1}$); at \(n=10\), 9/10 versus 10/10 (Lazy KRON max gap $2.5\cdot 10^{-5}$); at \(n=15\), 8/10 versus 9/10 (Lazy KRON max gap $1.4\cdot 10^{-1}$).  Lazy SEP matched the Full SEP tight count at every size.  The Lazy KRON and Lazy SEP columns give the
+median/maximum outer-approximation rounds and total added cuts.  The max viol.
+column is the largest final relative KRON cut violation, while max skew is the
+largest final relative coordinate skew-skew equation violation.
+
+\begin{table}[htbp]
+\centering
+\caption{Bound quality and diagnostics for max-distance instances.}
+\label{tab:maxdist_diagnostics}
+\begingroup
+\setlength{\tabcolsep}{1.6pt}
+\tiny
+\begin{tabular}{c|r r|r r|r r|r r r|r r r}
+\hline
+& \multicolumn{2}{c|}{Shor} & \multicolumn{2}{c|}{KRON} & \multicolumn{2}{c|}{SEP} & \multicolumn{3}{c|}{Lazy KRON} & \multicolumn{3}{c}{Lazy SEP} \\
+$n$ & tight & max gap & tight & max gap & tight & max gap & rounds & cuts & max viol. & rounds & cuts & max skew \\
+\hline
+2 & 0 & $8.8\cdot 10^{-1}$ & 10 & $1.3\cdot 10^{-6}$ & 10 & $2.7\cdot 10^{-6}$ & 5/5 & 4/4 & $8.3\cdot 10^{-8}$ & 1/1 & 0/0 & $1.5\cdot 10^{-8}$ \\
+4 & 0 & $7.7\cdot 10^{-1}$ & 9 & $2.2\cdot 10^{-5}$ & 10 & $7.3\cdot 10^{-7}$ & 6/9 & 5/8 & $6.1\cdot 10^{-8}$ & 1/1 & 0/0 & $5.9\cdot 10^{-8}$ \\
+6 & 0 & $7.6\cdot 10^{-1}$ & 10 & $2.4\cdot 10^{-6}$ & 10 & $3.3\cdot 10^{-8}$ & 4/7 & 4/6 & $8.4\cdot 10^{-8}$ & 1/2 & 0/50 & $2.6\cdot 10^{-9}$ \\
+8 & 0 & $7.3\cdot 10^{-1}$ & 9 & $2.3\cdot 10^{-1}$ & 10 & $5.2\cdot 10^{-8}$ & 6/24 & 6/23 & $10.0\cdot 10^{-8}$ & 1/2 & 0/50 & $1.1\cdot 10^{-8}$ \\
+10 & 0 & $6.5\cdot 10^{-1}$ & 10 & $1.0\cdot 10^{-6}$ & 10 & $8.4\cdot 10^{-8}$ & 7/12 & 6/11 & $9.6\cdot 10^{-8}$ & 1/2 & 0/50 & $2.0\cdot 10^{-9}$ \\
+15 & 0 & $5.5\cdot 10^{-1}$ & 9 & $1.4\cdot 10^{-1}$ & 10 & $1.3\cdot 10^{-7}$ & 8/20 & 7/19 & $9.0\cdot 10^{-8}$ & 1/4 & 0/150 & $1.0\cdot 10^{-8}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+\section{Ball-Constraints TTRS Instances}
+\noindent We ran Lazy SEP on the 212 centered diagonal TTRS instances from
+the ball-constraints repository, and Full SEP on 212 instances:
+all instances with \(n\in\{5, 10, 20\}\).  Shor and KRON are omitted from this panel.  The implementation uses the
+transpose of the paper's bilinear convention.  It forms the square SEP lift
+\[
+Z=\begin{pmatrix}1&y^\top\\ x&V\end{pmatrix},\qquad
+y=\operatorname{diag}(a)x+b,
+\]
+and represents \(V_{ij}=x_i y_j=x_i(a_jx_j+b_j)\) linearly through the
+\(x\)-moment matrix.  Full SEP imposes all skew-skew equations at once, while
+Lazy SEP adds violated coordinate skew-skew equations by separation.  For every SDP row, bound quality is measured using that method's own recovered first-column feasible point as an upper bound; neither Gurobi nor the corrected beta values are used to calculate an SDP gap.
+
+\begin{table}[htbp]
+\centering
+\caption{Results on TTRS instances from \cite{Burer.Anstreicher.2013}}
+\label{tab:TTRS_results}
+\vskip 10pt
+\begingroup
+\setlength{\tabcolsep}{3pt}
+\small
+\begin{tabular}{c r|r r r| r r r|r r r }
+\hline
+\multicolumn{2}{c|}{} & \multicolumn{3}{c|}{Full SEP} & \multicolumn{3}{c|}{Lazy SEP}& \multicolumn{3}{c}{Gurobi} \\
+\(n\) & cases & time & tight & max gap & time & tight & max gap   & time&tight&max gap \\
+\hline
+5 & 38 & 13 ms & 38 & $4.9\cdot 10^{-7}$ & 25 ms & 38 & $1.2\cdot 10^{-6}$ & 49 ms & 38 & $8.7\cdot 10^{-7}$ \\
+10 & 70 & 457 ms & 70 & $2.3\cdot 10^{-7}$ & 144 ms & 70 & $2.0\cdot 10^{-7}$ & 447 ms & 69 & $1.5\cdot 10^{-4}$ \\
+20 & 104 & 1016.15 s & 104 & $3.5\cdot 10^{-7}$ & 2.18 s & 104 & $7.5\cdot 10^{-7}$ & 487.45 s & 93 & $1.5\cdot 10^{-4}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Additional diagnostics for Lazy SEP on TTRS instances from \cite{Burer.Anstreicher.2013}}
+\label{tab:TTRS_diagnostics}
+\vskip 10pt
+\begingroup
+\begin{tabular}{c|r r r}
+\hline
+$n$& rounds & cuts&max skew\\
+\hline
+5 & 2/2 & 80/100 & $7.8\cdot 10^{-9}$\\
+10 & 2/2 & 100/100 & $8.4\cdot 10^{-9}$\\
+20 & 2/3 & 100/200 & $3.9\cdot 10^{-8}$\\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+\section{Larger Generated Instances}
+The displayed labels match the current manuscript labels only by reference.
+The blocks below are intended as add-on fragments, not automatic replacements
+for the existing tables.
+
+\subsection*{Larger max-distance instances}
+
+\noindent We generated 30 additional max-distance instances using the same generator
+and rank-one Shor prefilter as in Tables~\ref{tab:maxdist_times} and
+\ref{tab:maxdist_diagnostics}.  Full KRON, Full SEP, and Gurobi were omitted.
+The table columns therefore retain only the large-scale methods, Lazy KRON and
+Lazy SEP.  In the diagnostics table, tight means that the relative gap between
+the relaxation bound and the objective value of the recovered first-column
+point is at most \(10^-5\).  Relative rank-one residuals and recovered-point
+feasibility violations are also calculated and retained in the summary CSV,
+but neither enters the definition of tight.
+
+
+\begin{table}[htbp]
+\centering
+\caption{Results for larger max-distance instances}
+\label{tab:maxdist_larger}
+\vskip 10pt
+\begingroup
+\setlength{\tabcolsep}{2.5pt}
+\small
+\begin{tabular}{c c|r c r|r c r|r r r|r r r}
+\hline
+& &\multicolumn{3}{c|}{Lazy KRON} & \multicolumn{3}{c|}{Lazy SEP} & \multicolumn{3}{c|}{Lazy KRON} & \multicolumn{3}{c}{Lazy SEP} \\
+$n$& cases& time &tight & max gap & time &tight & max gap & rounds & cuts & max viol. & rounds & cuts & max skew \\
+\hline
+$20$ &10&294 ms & 8 & $1.7\cdot 10^{-5}$ & 1.01 s &10 & $1.7\cdot 10^{-7}$ & 4/9 & 3/8 & $4.7\cdot 10^{-8}$ & 1/2 & 0/50 & $2.8\cdot 10^{-8}$ \\
+$25$ &10&3.85 s & 9 & $9.2\cdot 10^{-5}$ & 3.20 s &10 & $9.5\cdot 10^{-8}$ & 3/7 & 2/6 & $6.7\cdot 10^{-8}$ & 1/1 & 0/0 & $1.6\cdot 10^{-9}$ \\
+$30$ &10&14.54 s & 9 & $1.8\cdot 10^{-5}$ & 9.17 s &10 & $1.7\cdot 10^{-8}$ & 4/7 & 3/6 & $8.5\cdot 10^{-8}$ & 1/3 & 0/100 & $1.5\cdot 10^{-9}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+\subsection*{Larger generated TTRS instances}
+
+\noindent We generated 30 centered affine-diagonal TTRS instances and used Shor
+only as a prefilter to discard instances already certified by rank-one recovery.
+The reported large-scale methods are Lazy KRON and Lazy SEP.  Since no beta or
+Gurobi reference is used in this generated panel, tight means that the relative
+gap between a relaxation bound and the objective value of its recovered point
+is at most \(10^-5\).  Relative rank-one residuals and recovered-point
+feasibility violations are also calculated and retained in the summary CSV,
+but neither enters the definition of tight.
+
+
+\begin{table}[htbp]
+\centering
+\caption{Results for additional TTRS instances}
+\label{tab:TTRS_larger}
+\vskip 10pt
+\begingroup
+\setlength{\tabcolsep}{2pt}
+\small
+\begin{tabular}{c c|r c r|r c r|r r r|r r r}
+\hline
+& &\multicolumn{3}{c|}{Lazy KRON} & \multicolumn{3}{c|}{Lazy SEP} & \multicolumn{3}{c|}{Lazy KRON} & \multicolumn{3}{c}{Lazy SEP} \\
+\(n\)& cases & time &tight & max gap & time& tight & max gap & rounds & cuts & max viol. & rounds & cuts & max skew \\
+\hline
+20 & 10&   309 ms  &4 & $4.6\cdot 10^{-5}$ & 1.01 s   &  10 & $1.6\cdot 10^{-7}$ & 4/18 & 4/17 & $8.8\cdot 10^{-8}$ & 1/5 & 0/100 & $7.5\cdot 10^{-8}$ \\
+25 & 10&   1.47 s  &6 & $3.8\cdot 10^{-1}$ & 3.69 s   &  10 & $3.8\cdot 10^{-6}$ & 7/22 & 6/21 & $7.8\cdot 10^{-8}$ & 1/10 & 0/900 & $9.9\cdot 10^{-8}$ \\
+30 & 10&   20.14 s  &4 & $4.2\cdot 10^{-1}$ & 12.15 s   &  10 & $5.4\cdot 10^{-7}$ & 6/37 & 5/36 & $9.6\cdot 10^{-8}$ & 2/6 & 52/500 & $9.2\cdot 10^{-8}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+\section{Noxious-Facility Instances}
+\begin{table}
+\caption{Distance upper bounds for regular \(m\)-gons}
+\vskip 10pt
+\label{tab:regular}
+\centering
+\begin{tabular}{r|rrrr}
+\toprule
+\(m\) & Shor & RLT & KRON & Full SEP \\
+\midrule
+3  & 1.414214 & 1.414214 & 1.174750 & 1.114373 \\
+4  & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+5  & 1.414214 & 1.414214 & 1.163184 & 1.025778 \\
+6  & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+7  & 1.414214 & 1.414214 & 1.149584 & 1.010315 \\
+8  & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+10 & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+12 & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+16 & 1.414214 & 1.414214 & 1.133203 & 1.001735 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% Full SEP distance upper bound for larger regular m-gons (m=20: 1.001735, m=24: 1.001735, m=32: 1.001735)
+
+\begin{table}
+\caption{Results for normalized random instances}
+\label{tab:random}
+\vskip 10pt
+\centering
+\begin{tabular}{rr|c|c|c|c}
+\toprule
+ & &Shor gap &  RLT gap & KRON gap & SEP gap\\
+\(m\) & cases & median/max & median/max & median/max& median/max\\
+\midrule
+4  & 10 & 0.462/0.525 & 0.454/0.525 & 0.152/0.234 & 0.084/0.219 \\
+6  & 10 & 0.445/0.495 & 0.426/0.494 & 0.203/0.264 & 0.144/0.257 \\
+8  & 10 & 0.480/0.506 & 0.472/0.505 & 0.268/0.355 & 0.217/0.351 \\
+10 & 10 & 0.526/0.618 & 0.526/0.607 & 0.318/0.389 & 0.249/0.332 \\
+15 & 10 & 0.537/0.624 & 0.537/0.624 & 0.358/0.402 & 0.315/0.387 \\
+20 & 10 & 0.581/0.613 & 0.581/0.613 & 0.402/0.430 & 0.365/0.402 \\
+\bottomrule
+\end{tabular}
+\end{table}
+% median Full SEP times for m=4,6,8,10,15,20: 0.046, 0.096, 0.174, 0.313, 0.819, 2.213 s; median KRON times for m=4,6,8,10,15,20: 0.074, 0.184, 0.506, 1.430, 7.235, 35.145 s
+
+\begin{table}\caption{Bounds for instance with points \eqref{eq:targeted}}
+\label{tab:targeted}
+\centering
+\vskip 10pt
+\begin{tabular}{r|r}
+\toprule
+method & distance upper bound \\
+\midrule
+Shor     & 1.2174074784 \\
+RLT      & 1.0382899391 \\
+KRON     & 0.8379375081 \\
+Full SEP & 0.7257975088 \\
+\midrule
+exact value & 0.7256779914 \\
+\bottomrule
+\end{tabular}
+
+\end{table}
+
+\end{document}

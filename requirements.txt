@@ -1,0 +1,7 @@
+# Python >= 3.11 (tomllib).  The committed results were produced with the
+# versions recorded in paper_experiments.toml [environment].
+numpy>=2.0
+scipy>=1.14
+# Commercial solvers; both need a license on the machine.
+Mosek>=11.0        # MOSEK 11 with the Fusion API (pip name "Mosek")
+gurobipy>=13.0     # Gurobi 13

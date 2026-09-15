@@ -1,0 +1,71 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\providecommand{\suchthat}{:\,}
+
+\begin{document}
+\section*{TTRS Computational Results}
+
+The displayed formulation below is included only so that this file compiles
+independently.  Copy only the block marked ``BEGIN PAPER INSERT'' into
+paper/Lorentz.tex.
+\begin{equation}
+\min\{x^\top Qx+2g^\top x\suchthat \|x\|\le 1,\ \|\operatorname{diag}(a)x+b\|\le 1\}.
+\end{equation}
+
+% ======================== BEGIN PAPER INSERT ========================
+\noindent We ran Lazy SEP on the 212 centered diagonal TTRS instances from
+the ball-constraints repository, and Full SEP on 212 instances:
+all instances with \(n\in\{5, 10, 20\}\).  Shor and KRON are omitted from this panel.  The implementation uses the
+transpose of the paper's bilinear convention.  It forms the square SEP lift
+\[
+Z=\begin{pmatrix}1&y^\top\\ x&V\end{pmatrix},\qquad
+y=\operatorname{diag}(a)x+b,
+\]
+and represents \(V_{ij}=x_i y_j=x_i(a_jx_j+b_j)\) linearly through the
+\(x\)-moment matrix.  Full SEP imposes all skew-skew equations at once, while
+Lazy SEP adds violated coordinate skew-skew equations by separation.  For every SDP row, bound quality is measured using that method's own recovered first-column feasible point as an upper bound; neither Gurobi nor the corrected beta values are used to calculate an SDP gap.
+
+\begin{table}[htbp]
+\centering
+\caption{Results on TTRS instances from \cite{Burer.Anstreicher.2013}}
+\label{tab:TTRS_results}
+\vskip 10pt
+\begingroup
+\setlength{\tabcolsep}{3pt}
+\small
+\begin{tabular}{c r|r r r| r r r|r r r }
+\hline
+\multicolumn{2}{c|}{} & \multicolumn{3}{c|}{Full SEP} & \multicolumn{3}{c|}{Lazy SEP}& \multicolumn{3}{c}{Gurobi} \\
+\(n\) & cases & time & tight & max gap & time & tight & max gap   & time&tight&max gap \\
+\hline
+5 & 38 & 13 ms & 38 & $4.9\cdot 10^{-7}$ & 25 ms & 38 & $1.2\cdot 10^{-6}$ & 49 ms & 38 & $8.7\cdot 10^{-7}$ \\
+10 & 70 & 457 ms & 70 & $2.3\cdot 10^{-7}$ & 144 ms & 70 & $2.0\cdot 10^{-7}$ & 447 ms & 69 & $1.5\cdot 10^{-4}$ \\
+20 & 104 & 1016.15 s & 104 & $3.5\cdot 10^{-7}$ & 2.18 s & 104 & $7.5\cdot 10^{-7}$ & 487.45 s & 93 & $1.5\cdot 10^{-4}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Additional diagnostics for Lazy SEP on TTRS instances from \cite{Burer.Anstreicher.2013}}
+\label{tab:TTRS_diagnostics}
+\vskip 10pt
+\begingroup
+\begin{tabular}{c|r r r}
+\hline
+$n$& rounds & cuts&max skew\\
+\hline
+5 & 2/2 & 80/100 & $7.8\cdot 10^{-9}$\\
+10 & 2/2 & 100/100 & $8.4\cdot 10^{-9}$\\
+20 & 2/3 & 100/200 & $3.9\cdot 10^{-8}$\\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+% ========================= END PAPER INSERT =========================
+
+\end{document}

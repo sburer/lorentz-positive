@@ -1,0 +1,3 @@
+[submodule "external/ballconstraints"]
+	path = external/ballconstraints
+	url = https://github.com/sburer/ballconstraints.git

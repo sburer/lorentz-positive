@@ -1,0 +1,175 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs}
+
+\newcommand{\Rbb}{\mathbb{R}}
+\newcommand{\Diag}{{\rm Diag}}
+\newcommand{\SEP}{{\rm SEP}}
+\newcommand{\tran}{^T}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\mprod}[2]{\langle #1,#2\rangle}
+
+\title{A Two-Dimensional Counterexample for the SEP and Beta TTRS Relaxations}
+\author{Computational note}
+\date{September 13, 2026}
+
+\begin{document}
+\maketitle
+
+\noindent
+This note records the small counterexample referenced at the end of Section 4.2
+of the current paper draft.  It is written in the notation of the paper:
+\(x\in\Rbb^n\) is the original TTRS variable, \(A=\Diag(a)\) is diagonal
+positive definite, and the second ball constraint is written through
+\(y=Ax+b\).
+
+\section{Instance}
+
+Consider
+\begin{equation}
+    \begin{array}{ll}
+    \min & x\tran Qx+c\tran x\\
+    {\rm s.t.} & \norm{x}\leq 1,\\
+                & \norm{Ax+b}\leq 1,
+    \end{array}
+    \label{eq:ttrs-counterexample}
+\end{equation}
+where \(n=2\),
+\[
+    a=
+    \begin{bmatrix}
+    4/3\\[2pt]
+    13/12
+    \end{bmatrix},
+    \qquad
+    b=
+    \begin{bmatrix}
+    11/20\\[2pt]
+    -1/20
+    \end{bmatrix},
+\]
+and
+\[
+Q=
+\begin{bmatrix}
+-24/16 & -1/16\\[2pt]
+-1/16 & -13/16
+\end{bmatrix},
+\qquad
+c=
+\begin{bmatrix}
+-1\\[2pt]
+0
+\end{bmatrix}.
+\]
+The smallest eigenvalue of \(Q\) is approximately \(-1.505635621484\), so the
+objective is nonconvex.
+
+\section{SEP Relaxation}
+
+The Full SEP relaxation uses the Shor moment matrix
+\[
+    H=
+    \begin{bmatrix}
+    1 & x\tran\\
+    x & X
+    \end{bmatrix}\succeq0
+\]
+together with the two trace inequalities
+\[
+    {\rm tr}(X)\leq1,\qquad
+    {\rm tr}(A^2X)+2b\tran Ax+\norm{b}^2\leq1.
+\]
+It also introduces
+\[
+    Z=
+    \begin{bmatrix}
+    1 & x\tran\\
+    y & V
+    \end{bmatrix}
+    \in\SEP(n+1,n+1),
+\]
+where \(y=Ax+b\), and imposes the affine consistency equations
+\[
+    Z_{0j}=x_j,\qquad
+    Z_{i0}=a_ix_i+b_i,\qquad
+    Z_{ij}=a_iX_{ij}+b_ix_j.
+\]
+The objective is \(\mprod{Q}{X}+c\tran x\).  On this instance, the Full SEP
+relaxation gives
+\[
+    z_{\rm SEP}=-0.632844508289.
+\]
+
+\section{Shifted Beta Relaxation}
+
+The shifted beta relaxation introduces variables \(\beta_i\) representing
+\(x_i^2\).  With \(w=(1,x,\beta)\), the two ball constraints become
+\[
+    1-\sum_i\beta_i\geq0,
+\]
+and
+\[
+    1-\norm{b}^2-2\sum_i a_ib_ix_i-\sum_i a_i^2\beta_i\geq0.
+\]
+The inequalities \(\beta_i\geq x_i^2\) are imposed with rotated second-order
+cones, and the beta SDP then includes the Shor, RLT, SOC-RLT, and Kronecker
+constraints in the same spirit as the beta relaxation used for the concentric
+TTRS instances.  For this shifted instance, the relaxation gives
+\[
+    z_{\beta}=-0.550899217259.
+\]
+
+\section{True Optimum}
+
+The true optimum was certified by enumerating the one-dimensional boundary arcs
+of the feasible intersection.  The value is
+\[
+    z^\star=-0.546797627007,
+\]
+attained at approximately
+\[
+    x^\star =
+    \begin{bmatrix}
+    0.185929524305185\\[2pt]
+    0.602567865182517
+    \end{bmatrix}.
+\]
+Thus both relaxations are strict lower bounds:
+\[
+    z^\star-z_{\rm SEP}=0.086046881282,\qquad
+    z^\star-z_{\beta}=0.004101590252.
+\]
+
+\section{Diagnostic Values}
+
+At the Full SEP optimum, the first-column point is well inside both ball
+constraints:
+\[
+    \norm{x}^2=0.139541363013,\qquad
+    \norm{Ax+b}^2=0.004339906310.
+\]
+The trace quantities behave differently:
+\[
+    {\rm tr}(X)=0.808104046269,\qquad
+    {\rm tr}(A^2X)+2b\tran Ax+\norm{b}^2=1.000000000282.
+\]
+The rank-one residual of the Shor moment matrix is approximately
+\[
+    0.498013951456.
+\]
+This is consistent with the interpretation that the missing ingredient is
+synchronization between the lifted quadratic representation and the product
+cone representation.
+
+\section{Reproduction}
+
+The script
+\[
+    \texttt{paper-code/verify\_ttrs\_sep\_beta\_counterexample.py}
+\]
+re-solves the Shor relaxation, the Full SEP relaxation, and the shifted beta
+relaxation, and then certifies the true value by boundary enumeration.  It is a
+named reproducibility check rather than part of the random computational panels.
+
+\end{document}

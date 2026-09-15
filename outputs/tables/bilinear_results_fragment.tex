@@ -1,0 +1,127 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+
+% Standalone macro fallbacks matching the notation used in paper/Lorentz.tex.
+\providecommand{\Rbb}{\mathbb{R}}
+\providecommand{\Ecal}{\mathcal{E}}
+\providecommand{\suchthat}{:\,}
+\providecommand{\norm}[1]{\left\lVert #1\right\rVert}
+
+\begin{document}
+\section*{Pure Bilinear Computational Results}
+
+The displayed formulation below is included only so that this file compiles
+independently.  Copy only the block marked ``BEGIN PAPER INSERT'' into
+paper/Lorentz.tex.
+\begin{equation}
+\label{eq:bilinear}
+\min\{c^\top x+d^\top y+y^\top Rx:\ x\in\Ecal_x,\ y\in\Ecal_y\}.
+\end{equation}
+
+% ======================== BEGIN PAPER INSERT ========================
+\noindent We generated 120 random instances of \eqref{eq:bilinear} with
+\(\Ecal_x=\{x\in\Rbb^m\suchthat \norm{x}\le 1\}\) and
+\(\Ecal_y=\{y\in\Rbb^n\suchthat \norm{y}\le 1\}\).  For each candidate instance, \(R\in\Rbb^{n\times m}\) was sampled with independent standard normal entries.  Let \(u_1\in\Rbb^n\) and \(v_1\in\Rbb^m\) be the leading left and right singular vectors of \(R\).  We then set \(c=\alpha v_1+\sigma g\) and \(d=\alpha u_1+\sigma h\), where \(g\) and \(h\) have independent standard normal entries, \(\alpha=3.0\), and \(\sigma=0.1\).  Finally, the triple \((c,d,R)\) was divided by \(\max\{\norm{c},\norm{d}\}\), so that \(\max\{\norm{c},\norm{d}\}=1\).
+For each size we scanned seeds starting from zero and selected the first ten candidates for which the Shor relative gap \((z_{\rm exact}-z_{\rm Shor})/|z_{\rm Shor}|\) exceeded \(0.01\).  We compared the Shor SDP relaxation, Full SEP, Lazy SEP,
+the Dual LOP/TRS bisection method, and Gurobi.
+Gurobi was run after the three conic methods with explicit bounds
+\(-1\le x_j\le 1\), \(-1\le y_i\le 1\) for each \(i\) and \(j\), the two
+ball constraints, and time limit \(\max\{5,3\,t_{\max}\}\), where
+\(t_{\max}\) is the maximum time used by the three conic methods on that
+instance.  Lazy SEP added at most 50 violated coordinate skew-skew equalities
+in each outer-approximation round, using violation tolerance \(10^{-7}\).
+The Dual LOP/TRS method used bisection tolerance \(10^{-6}\).
+
+\begin{table}[htbp]
+\centering
+\caption{Median wall-clock times for bilinear instances.}
+\label{tab:bilinear_times}
+\small
+\begin{tabular}{c r r r r r r r}
+\hline
+$n\times m$ & cases & Shor & Full SEP & Lazy SEP & LOP/TRS & Gurobi & Gurobi opt \\
+\hline
+$2\times 2$ & 10 & 1 ms & 1 ms & 1 ms & 18 ms & 25 ms & 10 \\
+$4\times 4$ & 10 & 1 ms & 2 ms & 5 ms & 23 ms & 1.81 s & 9 \\
+$6\times 6$ & 10 & 1 ms & 11 ms & 21 ms & 24 ms & 5.00 s & 0 \\
+$8\times 8$ & 10 & 2 ms & 49 ms & 82 ms & 28 ms & 5.00 s & 0 \\
+$10\times 10$ & 10 & 2 ms & 321 ms & 318 ms & 31 ms & 5.01 s & 0 \\
+$15\times 15$ & 10 & 3 ms & 12.00 s & 3.10 s & 40 ms & 36.00 s & 0 \\
+$20\times 20$ & 10 & 5 ms & 481.33 s & 51.20 s & 60 ms & 1444.06 s & 0 \\
+\hline
+$4\times 8$ & 10 & 1 ms & 7 ms & 16 ms & 27 ms & 5.00 s & 0 \\
+$8\times 12$ & 10 & 2 ms & 248 ms & 267 ms & 33 ms & 5.01 s & 0 \\
+$10\times 20$ & 10 & 3 ms & 7.14 s & 2.24 s & 51 ms & 21.42 s & 0 \\
+$15\times 20$ & 10 & 4 ms & 59.18 s & 15.22 s & 54 ms & 177.55 s & 0 \\
+$15\times 25$ & 10 & 5 ms & 249.54 s & 24.95 s & 65 ms & 748.66 s & 0 \\
+\hline
+\hline
+\end{tabular}
+\end{table}
+
+The median times required by different methods on these test instances are
+given in Table~\ref{tab:bilinear_times}.  In the table, the column
+\(n\times m\) gives the dimensions of \(y\) and \(x\), respectively.  Ten
+cases were run for each size.  The Shor, Full SEP, Lazy SEP, LOP/TRS, and
+Gurobi columns give median wall-clock times for the five methods.  The
+Gurobi opt column gives the number of instances solved to global optimality
+by Gurobi within its adaptive time limit.
+
+In Table~\ref{tab:bilinear_diagnostics} we give additional numerical
+diagnostics for the same instances as in Table~\ref{tab:bilinear_times}.  By
+construction none of the Shor instances has a lower bound that agrees with
+the exact conic value within \(10^{-5}\).  The ``Shor max
+gap'' column gives the largest gap between the exact conic value and
+the Shor lower bound.  The ``Conic max diff'' column is the largest
+objective difference
+among all the exact conic methods over all instances of that size.  The Lazy
+SEP columns give the median/maximum outer-approximation rounds, total added
+coordinate skew-skew cuts and the largest final coordinate skew-skew equation
+violation.  The
+LOP/TRS columns report the median/maximum TRS separation oracle solves for
+the Dual LOP/TRS method as well as the maximum final bisection
+bracket width.
+
+\begin{table}[htbp]
+\centering
+\caption{Additional diagnostics for bilinear instances.}
+\label{tab:bilinear_diagnostics}
+\begingroup
+\setlength{\tabcolsep}{2.5pt}
+\scriptsize
+\begin{tabular}{c|r|r|r r r|r r}
+\hline
+& Shor & Conic & \multicolumn{3}{c|}{Lazy SEP} & \multicolumn{2}{c}{LOP/TRS} \\
+$n\times m$ & max gap & max diff & rounds & cuts & max skew & oracles & max gap \\
+\hline
+$2\times 2$ & $2.9\cdot 10^{-1}$ & $5.5\cdot 10^{-8}$ & 2/2 & 1/1 & $2.3\cdot 10^{-14}$ & 23/23 & $8.9\cdot 10^{-7}$ \\
+$4\times 4$ & $2.4\cdot 10^{-1}$ & $3.2\cdot 10^{-8}$ & 2/2 & 36/36 & $5.8\cdot 10^{-12}$ & 23/23 & $8.3\cdot 10^{-7}$ \\
+$6\times 6$ & $1.9\cdot 10^{-1}$ & $1.2\cdot 10^{-7}$ & 3/4 & 100/150 & $1.3\cdot 10^{-8}$ & 23/23 & $8.1\cdot 10^{-7}$ \\
+$8\times 8$ & $1.4\cdot 10^{-1}$ & $3.2\cdot 10^{-8}$ & 5/6 & 200/250 & $2.2\cdot 10^{-9}$ & 23/23 & $7.5\cdot 10^{-7}$ \\
+$10\times 10$ & $1.2\cdot 10^{-1}$ & $4.1\cdot 10^{-8}$ & 9/12 & 400/550 & $2.1\cdot 10^{-9}$ & 23/23 & $7.3\cdot 10^{-7}$ \\
+$15\times 15$ & $6.8\cdot 10^{-2}$ & $1.2\cdot 10^{-8}$ & 22/37 & 1025/1800 & $3.0\cdot 10^{-9}$ & 23/23 & $6.7\cdot 10^{-7}$ \\
+$20\times 20$ & $6.7\cdot 10^{-2}$ & $5.5\cdot 10^{-9}$ & 63/76 & 3100/3750 & $9.9\cdot 10^{-9}$ & 23/23 & $6.6\cdot 10^{-7}$ \\
+\hline
+$4\times 8$ & $1.8\cdot 10^{-1}$ & $3.2\cdot 10^{-7}$ & 3/4 & 100/150 & $1.8\cdot 10^{-9}$ & 23/23 & $7.9\cdot 10^{-7}$ \\
+$8\times 12$ & $1.1\cdot 10^{-1}$ & $1.2\cdot 10^{-7}$ & 9/11 & 400/500 & $2.2\cdot 10^{-9}$ & 23/23 & $7.1\cdot 10^{-7}$ \\
+$10\times 20$ & $8.7\cdot 10^{-2}$ & $8.5\cdot 10^{-9}$ & 20/30 & 950/1450 & $2.2\cdot 10^{-9}$ & 23/23 & $6.8\cdot 10^{-7}$ \\
+$15\times 20$ & $6.0\cdot 10^{-2}$ & $2.3\cdot 10^{-8}$ & 41/54 & 2000/2650 & $1.9\cdot 10^{-9}$ & 23/23 & $6.5\cdot 10^{-7}$ \\
+$15\times 25$ & $5.5\cdot 10^{-2}$ & $3.1\cdot 10^{-7}$ & 46/82 & 2250/4050 & $2.3\cdot 10^{-9}$ & 23/23 & $6.5\cdot 10^{-7}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+
+To summarize these results, Lazy SEP is slower than Full SEP on smaller
+instances due to the overhead of checking for violated skew-skew constraints
+and repeated conic solves, but the time for Full SEP blows up faster as
+problem size increases.  The Dual LOP/TRS bisection algorithm is very fast
+and robust and scales much better than Full SEP or Lazy SEP.  These problems
+are difficult for Gurobi, even with the explicit variable bounds added, and
+cannot be solved in time competitive to the conic methods.
+% ========================= END PAPER INSERT =========================
+
+\end{document}
+

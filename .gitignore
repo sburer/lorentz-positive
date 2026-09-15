@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# LaTeX build artifacts from compiling the standalone fragments
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# Local CSV backups produced by schema migrations or long-run restarts
+*.before_*
+
+# Smoke tests, pilots, and other scratch outputs that never feed the paper
+outputs/**/*_pilot_*
+outputs/**/*_coordinate_*
+outputs/**/*_smoke*
+outputs/**/*_excluded_seeds.csv
+outputs/**/*_selected_seeds_adjusted.csv
+outputs/table_visual_comparisons/

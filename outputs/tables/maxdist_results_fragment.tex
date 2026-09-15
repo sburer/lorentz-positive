@@ -1,0 +1,121 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+
+% Standalone macro fallbacks matching the notation used in paper/Lorentz.tex.
+\providecommand{\Rbb}{\mathbb{R}}
+\providecommand{\Ecal}{\mathcal{E}}
+\providecommand{\suchthat}{:\,}
+\providecommand{\norm}[1]{\left\lVert #1\right\rVert}
+
+\begin{document}
+\section*{Max-Distance Computational Results}
+
+The displayed formulations below are included only so that this file compiles
+independently.  Copy only the block marked ``BEGIN PAPER INSERT'' into
+paper/Lorentz.tex.
+\begin{equation}
+\label{eq:quadratic}
+\min\{c^\top x+d^\top y+x^\top Qx+y^\top Py+y^\top Rx:\ x\in\Ecal_x,\ y\in\Ecal_y\}.
+\end{equation}
+\begin{equation}
+\label{eq:shor}
+\min\{\langle C,U\rangle:\ \operatorname{tr}X\le 1,\ \operatorname{tr}Y\le 1,\ U\succeq 0\}.
+\end{equation}
+\begin{equation}
+\label{eq:fullsep}
+\eqref{eq:shor}\ \text{with}\ Z=\mathcal{W}^*(T),\ \langle T,X\rangle=0\ \forall X\in\mathcal{A}(n)\otimes\mathcal{A}(m),\ T\succeq 0.
+\end{equation}
+
+% ======================== BEGIN PAPER INSERT ========================
+\noindent We generated 60 random max-distance instances, that is,
+instances of \eqref{eq:quadratic} of the form
+\[
+\max\{\norm{(Ax+a)-(By+b)}^2\suchthat \norm{x}\le 1,\ \norm{y}\le 1\},
+\]
+with \(n=m\), so that \(\Ecal_x=\{Ax+a\suchthat\norm{x}\le 1\}\) and
+\(\Ecal_y=\{By+b\suchthat\norm{y}\le 1\}\) are the two ellipsoids whose
+farthest pair of points is sought.  The maps \(A\) and \(B\) were generated as
+\(U\Sigma V^\top\) with Haar-random orthogonal \(U,V\) and singular values log-uniform on \([1,5.0]\), and the centers \(a\) and \(b\) have independent normal
+entries.  Because the Shor relaxation \eqref{eq:shor} is already exact on most max-distance instances, the instances reported here were selected by a rank-only screen, applied to seeds starting from zero.  The screen first solves \eqref{eq:shor} and discards the instance when the two largest eigenvalues of the optimal \(U\) satisfy \(\lambda_1/\lambda_2>10^4\), treating a numerically negative \(\lambda_2\) by using \(|\lambda_2|\) in the denominator.  Such a solution is effectively rank one, in which case \(U\) is itself a feasible point attaining the bound and the relaxation is exact.  For the remainder, the screen re-solves the Shor relaxation with the Shor objective held fixed up to solver tolerance and with a random linear objective; this exposes rank-one optima when the original solve returned a higher-rank point on a flat optimal face.  If this second solve is still not effectively rank one, the instance is retained; no feasible reference value is computed during this preselection step.  Such instances are rare: retaining 10 per size required scanning up to 16970 seeds.  The reported results are therefore conditional on the Shor relaxation not being certified rank one by this screen, and are not representative of the class as a whole.
+We compared the Shor SDP relaxation \eqref{eq:shor}, Shor strengthened by the
+KRON constraint \(K(Z)\succeq 0\), Lazy KRON, Full SEP \eqref{eq:fullsep}, and
+Lazy SEP.
+Unlike the bilinear problem of Section 3, none of these relaxations is
+guaranteed exact for the class \eqref{eq:quadratic}.  For each SDP method, we extracted
+\((x,y)\) from the first column of its optimal moment matrix, verified the two
+ball constraints to tolerance \(10^{-7}\), and evaluated the original
+minimization objective at that point.  This gives a method-specific feasible
+upper bound; no Gurobi incumbent or point recovered by another method is used
+to calculate an SDP gap.  The retained Gurobi runs used explicit bounds \(-1\le x_j\le 1\), \(-1\le y_i\le 1\), the two ball constraints, and time limit \(\max\{5,3\,t_{\max}\}\), where \(t_{\max}\) is the maximum conic-method time available when that Gurobi run was started.  These Gurobi rows were not rerun after the conic refresh and are reported only as an independent comparison.  Lazy KRON added at most 50 violated KRON cuts in each
+outer-approximation round.  Lazy SEP added at most 50 violated coordinate
+skew-skew equalities in each round.  Both used relative violation tolerance
+\(10^{-7}\).
+
+\begin{table}[htbp]
+\centering
+\caption{Median wall-clock times for max-distance instances.}
+\label{tab:maxdist_times}
+\small
+\begin{tabular}{c r r r r r r r r}
+\hline
+$n$ & cases & Shor & KRON & Lazy KRON & Full SEP & Lazy SEP & Gurobi & Gurobi opt \\
+\hline
+2 & 10 & 1 ms & 3 ms & 4 ms & 3 ms & 3 ms & 55 ms & 10 \\
+4 & 10 & 1 ms & 10 ms & 8 ms & 7 ms & 7 ms & 4.93 s & 5 \\
+6 & 10 & 2 ms & 69 ms & 10 ms & 21 ms & 14 ms & 5.00 s & 0 \\
+8 & 10 & 2 ms & 605 ms & 22 ms & 84 ms & 32 ms & 5.00 s & 0 \\
+10 & 10 & 2 ms & 4.60 s & 38 ms & 398 ms & 58 ms & 13.81 s & 0 \\
+15 & 10 & 4 ms & 611.65 s & 151 ms & 16.33 s & 251 ms & 1543.72 s & 0 \\
+\hline
+\hline
+\end{tabular}
+\end{table}
+
+The median times required by the different methods are given in
+Table~\ref{tab:maxdist_times}.  In the table, the column \(n\) gives the
+dimensions of \(y\) and \(x\).  The Gurobi opt column gives the
+number of instances solved to global optimality by Gurobi within its adaptive
+time limit.  The Full KRON solve for \(n=15\), seed 278, used two MOSEK
+threads after repeated memory-related termination with the default parallel
+setting; its formulation and tolerances were unchanged.
+
+Table~\ref{tab:maxdist_diagnostics} reports bound quality on the same instances.
+For Shor, Full KRON, and Full SEP (labeled SEP), the tight column counts instances whose
+method-specific relative recovered-point gap is at most \(10^{-5}\), while max
+gap gives the largest such gap over the instances of that size.  If
+\(z_{\rm sdp}\) is the SDP lower bound and \(z_{\rm rec}\) is that method's
+recovered feasible upper bound, this gap is
+\((z_{\rm rec}-z_{\rm sdp})/
+\max\{1,|z_{\rm rec}|,|z_{\rm sdp}|\}\).  Lazy KRON matched the Full KRON tight count at all other sizes, but at \(n=2\), 9/10 versus 10/10 (Lazy KRON max gap $1.7\cdot 10^{-5}$); at \(n=4\), 10/10 versus 9/10 (Lazy KRON max gap $8.2\cdot 10^{-6}$); at \(n=8\), 8/10 versus 9/10 (Lazy KRON max gap $2.3\cdot 10^{-1}$); at \(n=10\), 9/10 versus 10/10 (Lazy KRON max gap $2.5\cdot 10^{-5}$); at \(n=15\), 8/10 versus 9/10 (Lazy KRON max gap $1.4\cdot 10^{-1}$).  Lazy SEP matched the Full SEP tight count at every size.  The Lazy KRON and Lazy SEP columns give the
+median/maximum outer-approximation rounds and total added cuts.  The max viol.
+column is the largest final relative KRON cut violation, while max skew is the
+largest final relative coordinate skew-skew equation violation.
+
+\begin{table}[htbp]
+\centering
+\caption{Bound quality and diagnostics for max-distance instances.}
+\label{tab:maxdist_diagnostics}
+\begingroup
+\setlength{\tabcolsep}{1.6pt}
+\tiny
+\begin{tabular}{c|r r|r r|r r|r r r|r r r}
+\hline
+& \multicolumn{2}{c|}{Shor} & \multicolumn{2}{c|}{KRON} & \multicolumn{2}{c|}{SEP} & \multicolumn{3}{c|}{Lazy KRON} & \multicolumn{3}{c}{Lazy SEP} \\
+$n$ & tight & max gap & tight & max gap & tight & max gap & rounds & cuts & max viol. & rounds & cuts & max skew \\
+\hline
+2 & 0 & $8.8\cdot 10^{-1}$ & 10 & $1.3\cdot 10^{-6}$ & 10 & $2.7\cdot 10^{-6}$ & 5/5 & 4/4 & $8.3\cdot 10^{-8}$ & 1/1 & 0/0 & $1.5\cdot 10^{-8}$ \\
+4 & 0 & $7.7\cdot 10^{-1}$ & 9 & $2.2\cdot 10^{-5}$ & 10 & $7.3\cdot 10^{-7}$ & 6/9 & 5/8 & $6.1\cdot 10^{-8}$ & 1/1 & 0/0 & $5.9\cdot 10^{-8}$ \\
+6 & 0 & $7.6\cdot 10^{-1}$ & 10 & $2.4\cdot 10^{-6}$ & 10 & $3.3\cdot 10^{-8}$ & 4/7 & 4/6 & $8.4\cdot 10^{-8}$ & 1/2 & 0/50 & $2.6\cdot 10^{-9}$ \\
+8 & 0 & $7.3\cdot 10^{-1}$ & 9 & $2.3\cdot 10^{-1}$ & 10 & $5.2\cdot 10^{-8}$ & 6/24 & 6/23 & $10.0\cdot 10^{-8}$ & 1/2 & 0/50 & $1.1\cdot 10^{-8}$ \\
+10 & 0 & $6.5\cdot 10^{-1}$ & 10 & $1.0\cdot 10^{-6}$ & 10 & $8.4\cdot 10^{-8}$ & 7/12 & 6/11 & $9.6\cdot 10^{-8}$ & 1/2 & 0/50 & $2.0\cdot 10^{-9}$ \\
+15 & 0 & $5.5\cdot 10^{-1}$ & 9 & $1.4\cdot 10^{-1}$ & 10 & $1.3\cdot 10^{-7}$ & 8/20 & 7/19 & $9.0\cdot 10^{-8}$ & 1/4 & 0/150 & $1.0\cdot 10^{-8}$ \\
+\hline
+\hline
+\end{tabular}
+\endgroup
+\end{table}
+% ========================= END PAPER INSERT =========================
+
+\end{document}
+

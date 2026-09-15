@@ -1,0 +1,233 @@
+# Paper computational inventory for the Lorentz manuscript (paper/Lorentz.tex
+# in the parent repository).
+#
+# This file is the source-of-truth map between the manuscript and the
+# reproduction code.  It intentionally records what the paper needs, not every
+# exploratory experiment in the repository.  All paths are relative to this
+# directory, so the directory works the same whether it is a subfolder of the
+# paper repository or a repository of its own.  The manuscript path is the
+# one exception: it points outside this directory, and the manuscript checks
+# are skipped (not failed) when it is absent.
+manuscript = "../paper/Lorentz.tex"
+paper_code_root = "."
+output_root = "outputs"
+table_count = 11
+
+# Environment that produced the committed raw CSVs (timings depend on it;
+# bounds and gaps should reproduce on any machine to solver tolerance).
+[environment]
+machine = "Mac mini, Apple M4, 10 cores, 16 GB memory"
+os = "macOS 26.5.2"
+python = "3.14.6"
+numpy = "2.5.1"
+scipy = "1.18.0"
+mosek = "11.2.2 through Python Fusion"
+gurobi = "13.0.2 through gurobipy"
+thread_policy = "solver defaults unless the manuscript explicitly states otherwise"
+
+[global_tolerances]
+tight_relative_gap = 1.0e-5
+lazy_violation_tolerance = 1.0e-7
+dual_lop_trs_bisection_tolerance = 1.0e-6
+rank_one_screen_ratio = 1.0e4
+
+[outputs]
+raw = "outputs/raw"
+summary = "outputs/summary"
+tables = "outputs/tables"
+examples = "outputs/examples"
+
+[external]
+ballconstraints_repo = "https://github.com/sburer/ballconstraints"
+ballconstraints_submodule = "external/ballconstraints"
+ballconstraints_commit = "9304c25cd6f917de82bfc68038757fa6d3509720"
+ballconstraints_used_for = "212 TTRS instances (tab:TTRS_results, tab:TTRS_diagnostics), the beta relaxation in example ttrs_beta_failure_eq_24, and the conic standard-form builder behind the noxious-facility models"
+
+[[tables]]
+label = "tab:bilinear_times"
+section = "3.1"
+family = "bilinear"
+caption = "Median wall-clock times for bilinear instances."
+rows = ["2x2", "4x4", "6x6", "8x8", "10x10", "15x15", "20x20", "4x8", "8x12", "10x20", "15x20", "15x25"]
+columns = ["n x m", "cases", "Shor", "Full SEP", "Lazy SEP", "LOP/TRS", "Gurobi", "G_opt"]
+source_raw = "outputs/raw/bilinear_raw.csv"
+source_seeds = "outputs/raw/bilinear_selected_seeds.csv"
+source_table = "outputs/tables/bilinear_results_fragment.tex"
+notes = "Ten retained instances per row. Rectangular rows use n < m. Gurobi time limit is max(5, 3*t_max), where t_max is the maximum conic time on that instance."
+
+[[tables]]
+label = "tab:bilinear_diagnostics"
+section = "3.1"
+family = "bilinear"
+caption = "Additional diagnostics for bilinear instances."
+rows = ["2x2", "4x4", "6x6", "8x8", "10x10", "15x15", "20x20", "4x8", "8x12", "10x20", "15x20", "15x25"]
+columns = ["n x m", "Shor max gap", "Conic max diff", "Lazy SEP rounds", "Lazy SEP cuts", "Lazy SEP max skew", "LOP/TRS oracles", "LOP/TRS max gap"]
+source_raw = "outputs/raw/bilinear_raw.csv"
+source_seeds = "outputs/raw/bilinear_selected_seeds.csv"
+source_table = "outputs/tables/bilinear_results_fragment.tex"
+notes = "Uses the same 120 instances as tab:bilinear_times. Shor screening requires relative Shor gap greater than 0.01. Lazy SEP uses coordinate skew-skew cuts."
+
+[[tables]]
+label = "tab:maxdist_times"
+section = "4.1"
+family = "max_distance"
+caption = "Median wall-clock times for max-distance instances."
+rows = ["2", "4", "6", "8", "10", "15"]
+columns = ["n", "cases", "Shor", "KRON", "Lazy KRON", "Full SEP", "Lazy SEP", "Gurobi", "Gurobi opt"]
+source_raw = "outputs/raw/maxdist_raw.csv"
+source_seeds = "outputs/raw/maxdist_selected_seeds.csv"
+source_table = "outputs/tables/maxdist_results_fragment.tex"
+notes = "Ten retained instances per dimension. Candidate ellipsoid pairs are retained only when Shor is not certified rank one by the rank/face screen."
+
+[[tables]]
+label = "tab:maxdist_diagnostics"
+section = "4.1"
+family = "max_distance"
+caption = "Bound quality and diagnostics for max-distance instances."
+rows = ["2", "4", "6", "8", "10", "15"]
+columns = ["n", "Shor tight", "Shor max gap", "KRON tight", "KRON max gap", "SEP tight", "SEP max gap", "Lazy KRON rounds", "Lazy KRON cuts", "Lazy KRON max viol.", "Lazy SEP rounds", "Lazy SEP cuts", "Lazy SEP max skew"]
+source_raw = "outputs/raw/maxdist_raw.csv"
+source_seeds = "outputs/raw/maxdist_selected_seeds.csv"
+source_table = "outputs/tables/maxdist_results_fragment.tex"
+notes = "Each conic method uses its own first-column recovered feasible point for the upper bound. Tight means relative bound gap <= 1e-5."
+
+[[tables]]
+label = "tab:maxdist_larger"
+section = "4.1"
+family = "max_distance_large"
+caption = "Results for larger max-distance instances."
+rows = ["20", "25", "30"]
+columns = ["n", "cases", "Lazy KRON time", "Lazy KRON tight", "Lazy KRON max gap", "Lazy SEP time", "Lazy SEP tight", "Lazy SEP max gap", "Lazy KRON rounds", "Lazy KRON cuts", "Lazy KRON max viol.", "Lazy SEP rounds", "Lazy SEP cuts", "Lazy SEP max skew"]
+source_raw = "outputs/raw/maxdist_large_raw.csv"
+source_seeds = "outputs/raw/maxdist_large_selected_seeds.csv"
+source_table = "outputs/tables/large_instance_results_fragment.tex"
+notes = "Ten retained instances per dimension. Only Lazy KRON and Lazy SEP are run."
+
+[[tables]]
+label = "tab:TTRS_results"
+section = "4.2"
+family = "ttrs_212"
+caption = "Results on TTRS instances from Burer and Anstreicher (2013)."
+rows = ["5", "10", "20"]
+columns = ["n", "cases", "Full SEP time", "Full SEP tight", "Full SEP max gap", "Lazy SEP time", "Lazy SEP tight", "Lazy SEP max gap", "Gurobi time", "Gurobi tight", "Gurobi max gap"]
+source_raw = "outputs/raw/ttrs_raw.csv"
+source_table = "outputs/tables/ttrs_results_fragment.tex"
+notes = "Uses the 212 ballconstraints instances not solved by the 2013 SOC-RLT method: 38 with n=5, 70 with n=10, and 104 with n=20."
+
+[[tables]]
+label = "tab:TTRS_diagnostics"
+section = "4.2"
+family = "ttrs_212"
+caption = "Additional diagnostics for Lazy SEP on TTRS instances from Burer and Anstreicher (2013)."
+rows = ["5", "10", "20"]
+columns = ["n", "Lazy SEP rounds", "Lazy SEP cuts", "Lazy SEP max skew"]
+source_raw = "outputs/raw/ttrs_raw.csv"
+source_table = "outputs/tables/ttrs_results_fragment.tex"
+notes = "Uses the same 212 instances as tab:TTRS_results."
+
+[[tables]]
+label = "tab:TTRS_larger"
+section = "4.2"
+family = "ttrs_generated_large"
+caption = "Results for additional TTRS instances."
+rows = ["20", "25", "30"]
+columns = ["n", "cases", "Lazy KRON time", "Lazy KRON tight", "Lazy KRON max gap", "Lazy SEP time", "Lazy SEP tight", "Lazy SEP max gap", "Lazy KRON rounds", "Lazy KRON cuts", "Lazy KRON max viol.", "Lazy SEP rounds", "Lazy SEP cuts", "Lazy SEP max skew"]
+source_raw = "outputs/raw/ttrs_generated_large_raw.csv"
+source_seeds = "outputs/raw/ttrs_generated_large_selected_seeds.csv"
+source_table = "outputs/tables/large_instance_results_fragment.tex"
+notes = "Ten generated and Shor-filtered instances per dimension. Only Lazy KRON and Lazy SEP are run."
+
+[[tables]]
+label = "tab:regular"
+section = "4.3"
+family = "noxious_facility"
+caption = "Distance upper bounds for regular m-gons."
+rows = ["3", "4", "5", "6", "7", "8", "10", "12", "16"]
+columns = ["m", "Shor", "RLT", "KRON", "Full SEP"]
+source_raw = "outputs/raw/noxious_regular_m3_m12.csv; paper-code/outputs/raw/noxious_regular_m16.csv; paper-code/outputs/raw/noxious_regular_large.csv"
+source_script = "run_noxious_experiments.py"
+source_table = "outputs/tables/noxious_results_fragment.tex"
+notes = "Unit-sphere noxious formulation. noxious_regular_large.csv holds m=20,24,32, which the prose quotes (Full SEP 1.001735) but the table omits; the table maker writes them as a comment after the table."
+
+[[tables]]
+label = "tab:random"
+section = "4.3"
+family = "noxious_facility"
+caption = "Results for normalized random instances."
+rows = ["4", "6", "8", "10", "15", "20"]
+columns = ["m", "cases", "Shor gap median/max", "RLT gap median/max", "KRON gap median/max", "SEP gap median/max"]
+source_raw = "outputs/raw/noxious_random_panel.csv; paper-code/outputs/raw/noxious_random10.csv"
+source_script = "run_noxious_experiments.py"
+source_table = "outputs/tables/noxious_results_fragment.tex"
+notes = "Ten normalized random instances per m. Reports additive gaps theta_ub - theta_true."
+
+[[tables]]
+label = "tab:targeted"
+section = "4.3"
+family = "noxious_facility"
+caption = "Bounds for instance with points eq:targeted."
+rows = ["Shor", "RLT", "KRON", "Full SEP", "exact value"]
+columns = ["method", "distance upper bound"]
+source_raw = "outputs/raw/noxious_targeted_410.csv"
+source_script = "run_noxious_experiments.py"
+source_table = "outputs/tables/noxious_results_fragment.tex"
+notes = "Specific four-point instance from eq:targeted. Full SEP leaves additive distance gap about 1.20e-4."
+
+[[examples]]
+id = "ttrs_beta_failure_eq_24"
+section = "4.2"
+label = "eq:ttrs_counterexample_data"
+description = "Two-dimensional TTRS counterexample where Shor and SEP are not exact and the beta relaxation from Burer (2025) also fails to close the gap."
+required_values = [
+  "z_shor = -0.768293943469",
+  "z_sep = -0.632844508289",
+  "z_star = -0.546797627007",
+  "z_beta = -0.550899217259",
+  "SEP relative gap = 15.74 percent",
+  "beta relative gap = 0.75 percent"
+]
+source_script = "verify_ttrs_sep_beta_counterexample.py"
+source_note = "outputs/examples/ttrs_sep_beta_counterexample_note.tex"
+source_raw = "outputs/examples/ttrs_sep_beta_counterexample_verification.txt"
+external_dependency = "ballconstraints submodule (beta relaxation SDP builder)"
+notes = "Named reproducibility example at the end of Section 4.2; equation (24) in the current draft numbering. reproduce.py rewrites source_raw from source_script."
+
+[[examples]]
+id = "noxious_targeted_four_point"
+section = "4.3"
+label = "eq:targeted"
+description = "Four-point noxious-facility instance where Full SEP nearly closes the gap compared with Shor, RLT, and KRON."
+required_values = [
+  "Shor = 1.2174074784",
+  "RLT = 1.0382899391",
+  "KRON = 0.8379375081",
+  "Full SEP = 0.7257975088",
+  "exact value = 0.7256779914"
+]
+source_raw = "outputs/raw/noxious_targeted_410.csv"
+source_script = "run_noxious_experiments.py"
+notes = "Regenerate with: run_noxious_experiments.py --generator targeted-410 --methods all."
+
+[[examples]]
+id = "noxious_random_median_times"
+section = "4.3"
+label = "tab:random"
+description = "Median Full SEP and KRON wall-clock times quoted in the prose after tab:random for the normalized random instances."
+required_values = [
+  "Full SEP m=4 = 0.046",
+  "Full SEP m=6 = 0.096",
+  "Full SEP m=8 = 0.174",
+  "Full SEP m=10 = 0.313",
+  "Full SEP m=15 = 0.819",
+  "Full SEP m=20 = 2.213",
+  "KRON m=4 = 0.074",
+  "KRON m=6 = 0.184",
+  "KRON m=8 = 0.506",
+  "KRON m=10 = 1.430",
+  "KRON m=15 = 7.235",
+  "KRON m=20 = 35.145"
+]
+source_raw = "outputs/summary/noxious_summary.csv"
+source_script = "make_noxious_tables.py"
+notes = "The summary CSV carries a median_time column; the table fragment repeats the sentence as a comment after tab:random."
+
