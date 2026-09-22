@@ -144,7 +144,7 @@ family = "noxious_facility"
 caption = "Distance upper bounds for regular m-gons."
 rows = ["3", "4", "5", "6", "7", "8", "10", "12", "16"]
 columns = ["m", "Shor", "RLT", "KRON", "Full SEP"]
-source_raw = "outputs/raw/noxious_regular_m3_m12.csv; paper-code/outputs/raw/noxious_regular_m16.csv; paper-code/outputs/raw/noxious_regular_large.csv"
+source_raw = "outputs/raw/noxious_regular_m3_m12.csv; outputs/raw/noxious_regular_m16.csv; outputs/raw/noxious_regular_large.csv"
 source_script = "run_noxious_experiments.py"
 source_table = "outputs/tables/noxious_results_fragment.tex"
 notes = "Unit-sphere noxious formulation. noxious_regular_large.csv holds m=20,24,32, which the prose quotes (Full SEP 1.001735) but the table omits; the table maker writes them as a comment after the table."
@@ -156,7 +156,7 @@ family = "noxious_facility"
 caption = "Results for normalized random instances."
 rows = ["4", "6", "8", "10", "15", "20"]
 columns = ["m", "cases", "Shor gap median/max", "RLT gap median/max", "KRON gap median/max", "SEP gap median/max"]
-source_raw = "outputs/raw/noxious_random_panel.csv; paper-code/outputs/raw/noxious_random10.csv"
+source_raw = "outputs/raw/noxious_random_panel.csv; outputs/raw/noxious_random10.csv"
 source_script = "run_noxious_experiments.py"
 source_table = "outputs/tables/noxious_results_fragment.tex"
 notes = "Ten normalized random instances per m. Reports additive gaps theta_ub - theta_true."
@@ -230,4 +230,3 @@ required_values = [
 source_raw = "outputs/summary/noxious_summary.csv"
 source_script = "make_noxious_tables.py"
 notes = "The summary CSV carries a median_time column; the table fragment repeats the sentence as a comment after tab:random."
-
